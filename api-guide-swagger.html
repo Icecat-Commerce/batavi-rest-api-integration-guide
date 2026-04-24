@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Batavi REST API Documentation</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <style>
+    body { margin: 0; padding: 0; }
+  </style>
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js" charset="UTF-8"></script>
+  <script>
+    window.onload = () => {
+      const spec = {
+        openapi: "3.0.0",
+        info: {
+          title: "Batavi REST API",
+          description: "API used to create orders and retrieve order details for external partners, ERP connectors, and webshop integrations.",
+          version: "1.0",
+          contact: {
+            name: "Shop Administrator"
+          }
+        },
+        servers: [
+          {
+            url: "https://{your-domain}/rest",
+            variables: {
+              "your-domain": {
+                default: "example.com",
+                description: "The domain provided by your shop administrator."
+              }
+            }
+          }
+        ],
+        components: {
+          securitySchemes: {
+            basicAuth: { type: "http", scheme: "basic" },
+            bearerAuth: { type: "http", scheme: "bearer", bearerFormat: "JWT" }
+          },
+          schemas: {
+            Address: {
+              type: "object",
+              required: ["firstname", "lastname", "street", "house_number", "postcode", "city", "country_iso2"],
+              properties: {
+                firstname: { type: "string" },
+                lastname: { type: "string" },
+                street: { type: "string" },
+                house_number: { type: "string" },
+                postcode: { type: "string" },
+                city: { type: "string" },
+                country_iso2: { type: "string", description: "ISO 3166-1 alpha-2 code (e.g., NL, DE)" },
+                company: { type: "string" },
+                telephone: { type: "string" },
+                email: { type: "string" },
+                vat: { type: "string" },
+                coc: { type: "string" },
+                department: { type: "string" }
+              }
+            },
+            ProductInput: {
+              type: "object",
+              required: ["quantity"],
+              properties: {
+                sku: { type: "string", description: "Required if product_id is not supplied" },
+                product_id: { type: "integer", description: "Required if sku is not supplied" },
+                quantity: { type: "integer" },
+                price: { type: "number", format: "float" },
+                stock_location_code: { type: "string" }
+              }
+            }
+          }
+        },
+        security: [{ basicAuth: [] }, { bearerAuth: [] }],
+        paths: {
+          "/order/create": {
+            post: {
+              summary: "Create an order",
+              description: "Creates a Batavi order for the supplied customer and product lines. Note: Always send both shipping and invoice addresses.",
+              requestBody: {
+                required: true,
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      required: ["customer_id", "shipping", "invoice", "products"],
+                      properties: {
+                        customer_id: { type: "integer" },
+                        reference_code: { type: "string" },
+                        comment: { type: "string" },
+                        shipping: { $ref: "#/components/schemas/Address" },
+                        invoice: { $ref: "#/components/schemas/Address" },
+                        products: {
+                          type: "array",
+                          items: { $ref: "#/components/schemas/ProductInput" },
+                          minItems: 1
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              responses: {
+                200: {
+                  description: "Order Created (Success, with Warnings, or Split)",
+                  content: {
+                    "application/json": {
+                      example: {
+                        confirmed: true,
+                        message: "Order created successfully",
+                        code: "ORDER_CREATED",
+                        data: {
+                          orders: [{
+                            order_id: 336,
+                            status_name: "New Order",
+                            total_inc: 113.01,
+                            warnings: []
+                          }]
+                        }
+                      }
+                    }
+                  }
+                },
+                400: { description: "Bad Request (Unknown products or missing params)" },
+                401: { description: "Unauthorized" }
+              }
+            }
+          },
+          "/order/list": {
+            get: {
+              summary: "Retrieve order details",
+              description: "Retrieves details for a single order by its ID.",
+              parameters: [
+                {
+                  name: "id",
+                  in: "query",
+                  required: true,
+                  schema: { type: "integer" },
+                  description: "Order ID to retrieve."
+                },
+                {
+                  name: "fields",
+                  in: "query",
+                  schema: { type: "string" },
+                  description: "Comma-separated list of fields (e.g., id,status,products.sku)"
+                }
+              ],
+              responses: {
+                200: {
+                  description: "Detailed order information",
+                  content: {
+                    "application/json": {
+                      example: {
+                        confirmed: true,
+                        data: [{
+                          id: 336,
+                          referenceCode: "PO-2026-001",
+                          status: { name: "Processing", isOpen: 1 },
+                          totalInc: 113.01
+                        }]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+
+      window.ui = SwaggerUIBundle({
+        spec: spec,
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIBundle.SwaggerUIStandalonePreset
+        ],
+        layout: "BaseLayout"
+      });
+    };
+  </script>
+</body>
+</html>

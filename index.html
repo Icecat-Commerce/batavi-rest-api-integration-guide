@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Batavi REST API Integration Guide</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5d6b82;
+      --line: #d9e0ea;
+      --soft: #f5f7fa;
+      --accent: #0b6f85;
+      --accent-soft: #e8f5f7;
+      --code-bg: #111827;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #ffffff;
+      font: 15px/1.62 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    .page { max-width: 1080px; margin: 0 auto; padding: 48px 32px 72px; }
+    header { border-bottom: 3px solid var(--accent); padding-bottom: 24px; margin-bottom: 28px; }
+    header h1 { margin: 0 0 8px; font-size: 34px; line-height: 1.16; letter-spacing: 0; }
+    .meta { color: var(--muted); font-size: 14px; }
+    h1, h2, h3, h4 { color: var(--ink); letter-spacing: 0; }
+    h1 { font-size: 32px; margin: 0 0 16px; }
+    h2 { margin: 38px 0 12px; font-size: 24px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+    h3 { margin: 28px 0 10px; font-size: 18px; }
+    h4 { margin: 22px 0 8px; font-size: 16px; }
+    p { margin: 0 0 14px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: "JetBrains Mono", "SFMono-Regular", Consolas, monospace; font-size: 0.92em; background: var(--accent-soft); color: #074b59; padding: 0.12em 0.32em; border-radius: 4px; }
+    pre { margin: 14px 0 20px; padding: 16px; background: var(--code-bg); color: #f9fafb; border-radius: 8px; overflow: auto; line-height: 1.5; }
+    pre code { background: transparent; color: inherit; padding: 0; border-radius: 0; font-size: 13px; }
+    ul { margin: 8px 0 18px 24px; padding: 0; }
+    li { margin: 4px 0; }
+    hr { border: 0; border-top: 1px solid var(--line); margin: 34px 0; }
+    .toc { background: var(--soft); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; margin: 24px 0 34px; }
+    .toc h2 { border: 0; padding: 0; margin: 0 0 10px; font-size: 18px; }
+    .toc ol { margin: 0; padding-left: 20px; columns: 2; }
+    .toc li { break-inside: avoid; margin: 2px 0; color: var(--muted); }
+    .toc-level-3 { margin-left: 16px; font-size: 14px; }
+    .table-wrap { overflow-x: auto; margin: 14px 0 22px; }
+    table { width: 100%; border-collapse: collapse; border: 1px solid var(--line); }
+    th, td { text-align: left; vertical-align: top; padding: 9px 11px; border: 1px solid var(--line); }
+    th { background: #eef3f7; font-weight: 700; }
+    tbody tr:nth-child(even) td { background: #fafbfd; }
+    @media print {
+      body { font-size: 11pt; }
+      .page { max-width: none; padding: 0; }
+      pre { white-space: pre-wrap; }
+      .toc ol { columns: 1; }
+      h2 { page-break-after: avoid; }
+      table, pre { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>Batavi REST API Integration Guide</h1>
+      <div class="meta">Version 1.0 · Last updated 23 April 2026</div>
+    </header>
+    <nav class="toc"><h2>Contents</h2><ol><li class="toc-level-1"><a href="#batavi-rest-api-integration-guide">Batavi REST API Integration Guide</a></li><li class="toc-level-2"><a href="#overview">Overview</a></li><li class="toc-level-2"><a href="#base-url">Base URL</a></li><li class="toc-level-2"><a href="#authentication">Authentication</a></li><li class="toc-level-3"><a href="#http-basic-authentication">HTTP Basic Authentication</a></li><li class="toc-level-3"><a href="#oauth2-client-credentials">OAuth2 Client Credentials</a></li><li class="toc-level-2"><a href="#request-conventions">Request Conventions</a></li><li class="toc-level-2"><a href="#endpoint-summary">Endpoint Summary</a></li><li class="toc-level-2"><a href="#create-order">Create Order</a></li><li class="toc-level-3"><a href="#request-body">Request Body</a></li><li class="toc-level-3"><a href="#address-object">Address Object</a></li><li class="toc-level-3"><a href="#product-object">Product Object</a></li><li class="toc-level-3"><a href="#curl-example">cURL Example</a></li><li class="toc-level-3"><a href="#php-example">PHP Example</a></li><li class="toc-level-3"><a href="#successful-response">Successful Response</a></li><li class="toc-level-3"><a href="#successful-response-with-warnings">Successful Response with Warnings</a></li><li class="toc-level-3"><a href="#split-order-response">Split Order Response</a></li><li class="toc-level-3"><a href="#unknown-product-error">Unknown Product Error</a></li><li class="toc-level-2"><a href="#get-order-details">Get Order Details</a></li><li class="toc-level-3"><a href="#query-parameters">Query Parameters</a></li><li class="toc-level-3"><a href="#available-fields">Available Fields</a></li><li class="toc-level-3"><a href="#curl-examples">cURL Examples</a></li><li class="toc-level-3"><a href="#php-example">PHP Example</a></li><li class="toc-level-3"><a href="#full-response-example">Full Response Example</a></li><li class="toc-level-2"><a href="#response-field-reference">Response Field Reference</a></li><li class="toc-level-3"><a href="#order-fields">Order Fields</a></li><li class="toc-level-3"><a href="#product-line-fields">Product Line Fields</a></li><li class="toc-level-3"><a href="#status-object">Status Object</a></li><li class="toc-level-2"><a href="#response-codes">Response Codes</a></li><li class="toc-level-3"><a href="#success-codes">Success Codes</a></li><li class="toc-level-3"><a href="#error-codes">Error Codes</a></li><li class="toc-level-3"><a href="#warning-types">Warning Types</a></li><li class="toc-level-2"><a href="#implementation-notes">Implementation Notes</a></li></ol></nav>
+    <h1 id="batavi-rest-api-integration-guide">Batavi REST API Integration Guide</h1><p>Version: 1.0 Last updated: 23 April 2026</p><h2 id="overview">Overview</h2><p>This document describes the Batavi REST API endpoints used to create orders and retrieve order details. It is intended for external partners, ERP connectors, middleware platforms, and webshop integrations.</p><p>The API supports:</p><ul><li>Creating one or more Batavi orders from an external purchase order.</li><li>Submitting separate shipping and invoice addresses.</li><li>Ordering products by SKU or product ID.</li><li>Returning warnings for configurable business checks such as price mismatches, stock issues, and invalid stock locations.</li><li>Retrieving complete or filtered order details, including order-line status.</li></ul><h2 id="base-url">Base URL</h2><pre><code class="language-text">https://{your-domain}/rest</code></pre><p>Replace <code>{your-domain}</code> with the domain provided by the shop administrator.</p><h2 id="authentication">Authentication</h2><p>The API supports HTTP Basic Authentication and OAuth2 Client Credentials. The shop administrator will confirm which method is enabled for your account and provide the required credentials.</p><h3 id="http-basic-authentication">HTTP Basic Authentication</h3><p>Send the username and password with every request.</p><pre><code class="language-bash">curl -u &quot;username:password&quot; \
+  &quot;https://example.com/rest/order/list?id=336&quot;</code></pre><h3 id="oauth2-client-credentials">OAuth2 Client Credentials</h3><p>First request an access token using the client ID and client secret provided by the shop administrator.</p><pre><code class="language-bash">curl -X POST &quot;https://example.com/oauth.php&quot; \
+  -d &quot;grant_type=client_credentials&quot; \
+  -d &quot;client_id=YOUR_CLIENT_ID&quot; \
+  -d &quot;client_secret=YOUR_CLIENT_SECRET&quot;</code></pre><p>Example token response:</p><pre><code class="language-json">{
+  &quot;access_token&quot;: &quot;abc123...&quot;,
+  &quot;token_type&quot;: &quot;Bearer&quot;,
+  &quot;expires_in&quot;: 3600
+}</code></pre><p>Use the token in the <code>Authorization</code> header for API requests. Tokens expire after the number of seconds returned in <code>expires_in</code>.</p><pre><code class="language-bash">curl -H &quot;Authorization: Bearer abc123...&quot; \
+  &quot;https://example.com/rest/order/list?id=336&quot;</code></pre><h2 id="request-conventions">Request Conventions</h2><div class="table-wrap"><table><thead><tr><th>Item</th><th>Requirement</th></tr></thead><tbody><tr><td>Content type</td><td>Send JSON request bodies with <code>Content-Type: application/json</code>.</td></tr><tr><td>Character encoding</td><td>Use UTF-8.</td></tr><tr><td>Dates</td><td>Date-time values are returned in <code>YYYY-MM-DD HH:MM:SS</code> format.</td></tr><tr><td>Prices</td><td>Prices are returned in the shop&#x27;s default currency, typically EUR.</td></tr><tr><td>VAT</td><td>Amounts with <code>Inc</code> include VAT. Amounts with <code>Exc</code>, <code>Excl</code>, or <code>ExclTax</code> exclude VAT.</td></tr></tbody></table></div><h2 id="endpoint-summary">Endpoint Summary</h2><div class="table-wrap"><table><thead><tr><th>Method</th><th>Endpoint</th><th>Description</th></tr></thead><tbody><tr><td><code>POST</code></td><td><code>/rest/order/create</code></td><td>Create an order.</td></tr><tr><td><code>GET</code></td><td><code>/rest/order/list</code></td><td>Retrieve order details by order ID.</td></tr></tbody></table></div><hr><h2 id="create-order">Create Order</h2><p>Creates a Batavi order for the supplied customer and product lines.</p><pre><code class="language-http">POST /rest/order/create</code></pre><h3 id="request-body">Request Body</h3><div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody><tr><td><code>customer_id</code></td><td>integer</td><td>Yes</td><td>Customer login ID supplied by the shop administrator.</td></tr><tr><td><code>reference_code</code></td><td>string</td><td>No</td><td>External order reference, such as a purchase order number.</td></tr><tr><td><code>comment</code></td><td>string</td><td>No</td><td>Internal order note or delivery instruction.</td></tr><tr><td><code>shipping</code></td><td>object</td><td>Yes</td><td>Shipping address.</td></tr><tr><td><code>invoice</code></td><td>object</td><td>Yes</td><td>Invoice or billing address.</td></tr><tr><td><code>products</code></td><td>array</td><td>Yes</td><td>Product lines. At least one product is required.</td></tr></tbody></table></div><h3 id="address-object">Address Object</h3><p>The <code>shipping</code> and <code>invoice</code> objects use the same fields.</p><div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody><tr><td><code>firstname</code></td><td>string</td><td>Yes</td><td>First name.</td></tr><tr><td><code>lastname</code></td><td>string</td><td>Yes</td><td>Last name.</td></tr><tr><td><code>street</code></td><td>string</td><td>Yes</td><td>Street name.</td></tr><tr><td><code>house_number</code></td><td>string</td><td>Yes</td><td>House number.</td></tr><tr><td><code>postcode</code></td><td>string</td><td>Yes</td><td>Postal code.</td></tr><tr><td><code>city</code></td><td>string</td><td>Yes</td><td>City.</td></tr><tr><td><code>country_iso2</code></td><td>string</td><td>Yes</td><td>ISO 3166-1 alpha-2 country code, such as <code>NL</code>, <code>DE</code>, or <code>BE</code>.</td></tr><tr><td><code>company</code></td><td>string</td><td>No</td><td>Company name.</td></tr><tr><td><code>telephone</code></td><td>string</td><td>No</td><td>Phone number.</td></tr><tr><td><code>email</code></td><td>string</td><td>No</td><td>Email address.</td></tr><tr><td><code>vat</code></td><td>string</td><td>No</td><td>VAT number.</td></tr><tr><td><code>coc</code></td><td>string</td><td>No</td><td>Chamber of Commerce number.</td></tr><tr><td><code>department</code></td><td>string</td><td>No</td><td>Department name.</td></tr></tbody></table></div><h3 id="product-object">Product Object</h3><p>Each product line must contain either <code>sku</code> or <code>product_id</code>.</p><div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody><tr><td><code>sku</code></td><td>string</td><td>Conditional</td><td>Product SKU. Required when <code>product_id</code> is not supplied.</td></tr><tr><td><code>product_id</code></td><td>integer</td><td>Conditional</td><td>Batavi product ID. Required when <code>sku</code> is not supplied.</td></tr><tr><td><code>quantity</code></td><td>integer</td><td>Yes</td><td>Quantity to order.</td></tr><tr><td><code>price</code></td><td>number</td><td>No</td><td>Expected unit price. If it differs from the system price, the API may return a <code>price_mismatch</code> warning.</td></tr><tr><td><code>stock_location_code</code></td><td>string</td><td>No</td><td>Warehouse or stock location code. If omitted or invalid, the product&#x27;s default stock location is used.</td></tr></tbody></table></div><h3 id="curl-example">cURL Example</h3><pre><code class="language-bash">curl -X POST &quot;https://example.com/rest/order/create&quot; \
+  -u &quot;username:password&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#x27;{
+    &quot;customer_id&quot;: 65,
+    &quot;reference_code&quot;: &quot;PO-2026-001&quot;,
+    &quot;shipping&quot;: {
+      &quot;firstname&quot;: &quot;John&quot;,
+      &quot;lastname&quot;: &quot;Doe&quot;,
+      &quot;company&quot;: &quot;Acme BV&quot;,
+      &quot;street&quot;: &quot;Keizersgracht&quot;,
+      &quot;house_number&quot;: &quot;100&quot;,
+      &quot;postcode&quot;: &quot;1015AA&quot;,
+      &quot;city&quot;: &quot;Amsterdam&quot;,
+      &quot;country_iso2&quot;: &quot;NL&quot;,
+      &quot;telephone&quot;: &quot;+31201234567&quot;
+    },
+    &quot;invoice&quot;: {
+      &quot;firstname&quot;: &quot;John&quot;,
+      &quot;lastname&quot;: &quot;Doe&quot;,
+      &quot;company&quot;: &quot;Acme BV&quot;,
+      &quot;street&quot;: &quot;Herengracht&quot;,
+      &quot;house_number&quot;: &quot;200&quot;,
+      &quot;postcode&quot;: &quot;1016BS&quot;,
+      &quot;city&quot;: &quot;Amsterdam&quot;,
+      &quot;country_iso2&quot;: &quot;NL&quot;,
+      &quot;vat&quot;: &quot;NL123456789B01&quot;
+    },
+    &quot;products&quot;: [
+      {
+        &quot;sku&quot;: &quot;LENOVO_0A36262&quot;,
+        &quot;quantity&quot;: 2,
+        &quot;price&quot;: 31.20
+      },
+      {
+        &quot;sku&quot;: &quot;HP_1X644AA&quot;,
+        &quot;quantity&quot;: 1
+      }
+    ],
+    &quot;comment&quot;: &quot;Deliver before Friday&quot;
+  }&#x27;</code></pre><h3 id="php-example">PHP Example</h3><pre><code class="language-php">&lt;?php
+$url = &#x27;https://example.com/rest/order/create&#x27;;
+$username = &#x27;your_username&#x27;;
+$password = &#x27;your_password&#x27;;
+
+$order = [
+    &#x27;customer_id&#x27; =&gt; 65,
+    &#x27;reference_code&#x27; =&gt; &#x27;PO-2026-001&#x27;,
+    &#x27;shipping&#x27; =&gt; [
+        &#x27;firstname&#x27; =&gt; &#x27;John&#x27;,
+        &#x27;lastname&#x27; =&gt; &#x27;Doe&#x27;,
+        &#x27;company&#x27; =&gt; &#x27;Acme BV&#x27;,
+        &#x27;street&#x27; =&gt; &#x27;Keizersgracht&#x27;,
+        &#x27;house_number&#x27; =&gt; &#x27;100&#x27;,
+        &#x27;postcode&#x27; =&gt; &#x27;1015AA&#x27;,
+        &#x27;city&#x27; =&gt; &#x27;Amsterdam&#x27;,
+        &#x27;country_iso2&#x27; =&gt; &#x27;NL&#x27;,
+    ],
+    &#x27;invoice&#x27; =&gt; [
+        &#x27;firstname&#x27; =&gt; &#x27;John&#x27;,
+        &#x27;lastname&#x27; =&gt; &#x27;Doe&#x27;,
+        &#x27;company&#x27; =&gt; &#x27;Acme BV&#x27;,
+        &#x27;street&#x27; =&gt; &#x27;Herengracht&#x27;,
+        &#x27;house_number&#x27; =&gt; &#x27;200&#x27;,
+        &#x27;postcode&#x27; =&gt; &#x27;1016BS&#x27;,
+        &#x27;city&#x27; =&gt; &#x27;Amsterdam&#x27;,
+        &#x27;country_iso2&#x27; =&gt; &#x27;NL&#x27;,
+        &#x27;vat&#x27; =&gt; &#x27;NL123456789B01&#x27;,
+    ],
+    &#x27;products&#x27; =&gt; [
+        [&#x27;sku&#x27; =&gt; &#x27;LENOVO_0A36262&#x27;, &#x27;quantity&#x27; =&gt; 2, &#x27;price&#x27; =&gt; 31.20],
+        [&#x27;sku&#x27; =&gt; &#x27;HP_1X644AA&#x27;, &#x27;quantity&#x27; =&gt; 1],
+    ],
+    &#x27;comment&#x27; =&gt; &#x27;Deliver before Friday&#x27;,
+];
+
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($order));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [&#x27;Content-Type: application/json&#x27;]);
+curl_setopt($ch, CURLOPT_USERPWD, &quot;$username:$password&quot;);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+$result = json_decode($response, true);
+
+if (!empty($result[&#x27;confirmed&#x27;])) {
+    foreach ($result[&#x27;data&#x27;][&#x27;orders&#x27;] as $createdOrder) {
+        echo &quot;Order #{$createdOrder[&#x27;order_id&#x27;]} created. Status: {$createdOrder[&#x27;status_name&#x27;]}\n&quot;;
+
+        foreach ($createdOrder[&#x27;warnings&#x27;] ?? [] as $warning) {
+            echo &quot;Warning [{$warning[&#x27;type&#x27;]}] for SKU {$warning[&#x27;sku&#x27;]}\n&quot;;
+        }
+    }
+} else {
+    echo &quot;Error: {$result[&#x27;message&#x27;]} ({$result[&#x27;code&#x27;]})\n&quot;;
+}</code></pre><h3 id="successful-response">Successful Response</h3><pre><code class="language-json">{
+  &quot;confirmed&quot;: true,
+  &quot;message&quot;: &quot;Order created successfully&quot;,
+  &quot;code&quot;: &quot;ORDER_CREATED&quot;,
+  &quot;data&quot;: {
+    &quot;orders&quot;: [
+      {
+        &quot;order_id&quot;: 336,
+        &quot;status_id&quot;: 1,
+        &quot;status_name&quot;: &quot;New Order&quot;,
+        &quot;products_count&quot;: 2,
+        &quot;total_exc&quot;: 93.40,
+        &quot;total_inc&quot;: 113.01,
+        &quot;warnings&quot;: []
+      }
+    ]
+  }
+}</code></pre><h3 id="successful-response-with-warnings">Successful Response with Warnings</h3><p>Depending on shop configuration, the API may return warnings when a submitted price does not match the system price, a requested product is out of stock, or the submitted stock location is invalid. The order is still created, but it may be placed on hold for manual review.</p><pre><code class="language-json">{
+  &quot;confirmed&quot;: true,
+  &quot;message&quot;: &quot;Order created with warnings&quot;,
+  &quot;code&quot;: &quot;ORDER_CREATED_WITH_WARNINGS&quot;,
+  &quot;data&quot;: {
+    &quot;orders&quot;: [
+      {
+        &quot;order_id&quot;: 337,
+        &quot;status_id&quot;: 7,
+        &quot;status_name&quot;: &quot;On Hold&quot;,
+        &quot;products_count&quot;: 2,
+        &quot;total_exc&quot;: 93.40,
+        &quot;total_inc&quot;: 113.01,
+        &quot;warnings&quot;: [
+          {
+            &quot;type&quot;: &quot;price_mismatch&quot;,
+            &quot;sku&quot;: &quot;LENOVO_0A36262&quot;,
+            &quot;submitted_price&quot;: 31.20,
+            &quot;batavi_price&quot;: 26.00
+          },
+          {
+            &quot;type&quot;: &quot;out_of_stock&quot;,
+            &quot;sku&quot;: &quot;HP_1X644AA&quot;,
+            &quot;available_stock&quot;: 0,
+            &quot;requested_quantity&quot;: 1
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre><h3 id="split-order-response">Split Order Response</h3><p>Depending on shop configuration, products from different distributor regions may be split into separate Batavi orders.</p><pre><code class="language-json">{
+  &quot;confirmed&quot;: true,
+  &quot;message&quot;: &quot;Order split into 2 orders by distributor location&quot;,
+  &quot;code&quot;: &quot;ORDER_CREATED_SPLIT&quot;,
+  &quot;data&quot;: {
+    &quot;orders&quot;: [
+      {
+        &quot;order_id&quot;: 338,
+        &quot;status_id&quot;: 1,
+        &quot;status_name&quot;: &quot;New Order&quot;,
+        &quot;products_count&quot;: 1,
+        &quot;total_exc&quot;: 62.40,
+        &quot;total_inc&quot;: 75.50,
+        &quot;distributor_country&quot;: &quot;NL&quot;,
+        &quot;warnings&quot;: []
+      },
+      {
+        &quot;order_id&quot;: 339,
+        &quot;status_id&quot;: 1,
+        &quot;status_name&quot;: &quot;New Order&quot;,
+        &quot;products_count&quot;: 1,
+        &quot;total_exc&quot;: 31.00,
+        &quot;total_inc&quot;: 37.51,
+        &quot;distributor_country&quot;: &quot;DE&quot;,
+        &quot;warnings&quot;: []
+      }
+    ]
+  }
+}</code></pre><h3 id="unknown-product-error">Unknown Product Error</h3><p>If one or more SKUs or product IDs cannot be found, the order is rejected by default. Some shops may allow unknown products to be added as custom order lines; contact the shop administrator to confirm the configured behavior.</p><pre><code class="language-json">{
+  &quot;error&quot;: true,
+  &quot;message&quot;: &quot;Order rejected: unknown products&quot;,
+  &quot;code&quot;: &quot;ORDER_REJECTED_UNKNOWN_PRODUCTS&quot;,
+  &quot;data&quot;: {
+    &quot;unknown_products&quot;: [
+      &quot;INVALID-SKU-1&quot;,
+      &quot;INVALID-SKU-2&quot;
+    ]
+  }
+}</code></pre><p>When the order is rejected, fix or remove the values listed in <code>unknown_products</code> and retry the request.</p><hr><h2 id="get-order-details">Get Order Details</h2><p>Retrieves details for a single order. Use the <code>fields</code> query parameter to reduce response size when only specific fields are needed.</p><pre><code class="language-http">GET /rest/order/list</code></pre><h3 id="query-parameters">Query Parameters</h3><div class="table-wrap"><table><thead><tr><th>Name</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody><tr><td><code>id</code></td><td>integer</td><td>Yes</td><td>Order ID to retrieve.</td></tr><tr><td><code>fields</code></td><td>string</td><td>No</td><td>Comma-separated list of fields to return.</td></tr></tbody></table></div><h3 id="available-fields">Available Fields</h3><p>Order-level fields:</p><pre><code class="language-text">id, referenceCode, status, currency, subtotalExc, subtotalInc,
+shippingExc, shippingInc, totalExc, totalInc, datePurchased,
+lastModified, storeType, customer, shipping, invoice, products</code></pre><p>Product-level fields use the <code>products.</code> prefix:</p><pre><code class="language-text">products.id, products.ordersId, products.status, products.sku,
+products.name, products.model, products.mpn, products.gtin,
+products.quantity, products.price, products.sales_price,
+products.subtotalExclTax, products.subtotalInclTax, products.tax,
+products.productVatPercentage, products.weight, products.brand,
+products.stockLocation, products.updated</code></pre><h3 id="curl-examples">cURL Examples</h3><p>Get full order details:</p><pre><code class="language-bash">curl -u &quot;username:password&quot; \
+  &quot;https://example.com/rest/order/list?id=336&quot;</code></pre><p>Get only high-level order status:</p><pre><code class="language-bash">curl -u &quot;username:password&quot; \
+  &quot;https://example.com/rest/order/list?id=336&amp;fields=id,referenceCode,status,lastModified&quot;</code></pre><p>Example response:</p><pre><code class="language-json">{
+  &quot;confirmed&quot;: true,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 336,
+      &quot;referenceCode&quot;: &quot;PO-2026-001&quot;,
+      &quot;status&quot;: {
+        &quot;id&quot;: 2,
+        &quot;isOpen&quot;: 1,
+        &quot;isPaid&quot;: 0,
+        &quot;isShipped&quot;: 0,
+        &quot;name&quot;: &quot;Processing&quot;
+      },
+      &quot;lastModified&quot;: &quot;2026-04-10 14:30:00&quot;
+    }
+  ]
+}</code></pre><p>Get order line statuses:</p><pre><code class="language-bash">curl -u &quot;username:password&quot; \
+  &quot;https://example.com/rest/order/list?id=336&amp;fields=id,status,products.id,products.sku,products.quantity,products.status&quot;</code></pre><p>Example response:</p><pre><code class="language-json">{
+  &quot;confirmed&quot;: true,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 336,
+      &quot;status&quot;: {
+        &quot;id&quot;: 2,
+        &quot;name&quot;: &quot;Processing&quot;,
+        &quot;isOpen&quot;: 1,
+        &quot;isPaid&quot;: 0,
+        &quot;isShipped&quot;: 1
+      },
+      &quot;products&quot;: [
+        {
+          &quot;id&quot;: 5001,
+          &quot;sku&quot;: &quot;LENOVO_0A36262&quot;,
+          &quot;quantity&quot;: 2,
+          &quot;status&quot;: {
+            &quot;id&quot;: 3,
+            &quot;name&quot;: &quot;Shipped&quot;,
+            &quot;isOpen&quot;: 0,
+            &quot;isPaid&quot;: 0,
+            &quot;isShipped&quot;: 1
+          }
+        },
+        {
+          &quot;id&quot;: 5002,
+          &quot;sku&quot;: &quot;HP_1X644AA&quot;,
+          &quot;quantity&quot;: 1,
+          &quot;status&quot;: {
+            &quot;id&quot;: 1,
+            &quot;name&quot;: &quot;New Order&quot;,
+            &quot;isOpen&quot;: 1,
+            &quot;isPaid&quot;: 0,
+            &quot;isShipped&quot;: 0
+          }
+        }
+      ]
+    }
+  ]
+}</code></pre><p>Order status and product-line status are tracked independently. A product line can be shipped while other lines are still pending. Check <code>isShipped</code> on each product line to determine which items have been dispatched.</p><h3 id="php-example">PHP Example</h3><pre><code class="language-php">&lt;?php
+$orderId = 336;
+$url = &quot;https://example.com/rest/order/list?id=$orderId&quot;;
+
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_USERPWD, &quot;$username:$password&quot;);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+$result = json_decode($response, true);
+
+if (!empty($result[&#x27;confirmed&#x27;])) {
+    foreach ($result[&#x27;data&#x27;] as $order) {
+        echo &quot;Order #{$order[&#x27;id&#x27;]}\n&quot;;
+        echo &quot;Status: {$order[&#x27;status&#x27;][&#x27;id&#x27;]} (shipped: {$order[&#x27;status&#x27;][&#x27;isShipped&#x27;]})\n&quot;;
+        echo &quot;Total: {$order[&#x27;currency&#x27;][&#x27;code&#x27;]} {$order[&#x27;totalInc&#x27;]}\n&quot;;
+
+        foreach ($order[&#x27;products&#x27;] as $product) {
+            echo &quot;- {$product[&#x27;sku&#x27;]} x{$product[&#x27;quantity&#x27;]} @ {$product[&#x27;price&#x27;]}&quot;;
+            echo &quot; status: {$product[&#x27;status&#x27;][&#x27;id&#x27;]}\n&quot;;
+        }
+    }
+}</code></pre><h3 id="full-response-example">Full Response Example</h3><pre><code class="language-json">{
+  &quot;confirmed&quot;: true,
+  &quot;data&quot;: [
+    {
+      &quot;id&quot;: 336,
+      &quot;status&quot;: {
+        &quot;id&quot;: 1,
+        &quot;cssClass&quot;: &quot;status-new&quot;,
+        &quot;isOpen&quot;: 1,
+        &quot;isPaid&quot;: 0,
+        &quot;isShipped&quot;: 0,
+        &quot;isBlocking&quot;: 0,
+        &quot;isQuote&quot;: 0,
+        &quot;sortOrder&quot;: 1
+      },
+      &quot;currency&quot;: {
+        &quot;id&quot;: 1,
+        &quot;title&quot;: &quot;Euro&quot;,
+        &quot;code&quot;: &quot;EUR&quot;,
+        &quot;value&quot;: 1.0
+      },
+      &quot;referenceCode&quot;: &quot;PO-2026-001&quot;,
+      &quot;subtotalExc&quot;: 93.40,
+      &quot;subtotalInc&quot;: 113.01,
+      &quot;shippingExc&quot;: 0.00,
+      &quot;shippingInc&quot;: 0.00,
+      &quot;totalExc&quot;: 93.40,
+      &quot;totalInc&quot;: 113.01,
+      &quot;datePurchased&quot;: &quot;2026-04-10 10:58:00&quot;,
+      &quot;lastModified&quot;: &quot;2026-04-10 10:58:00&quot;,
+      &quot;customer&quot;: {
+        &quot;id&quot;: 64,
+        &quot;firstname&quot;: &quot;John&quot;,
+        &quot;lastname&quot;: &quot;Doe&quot;,
+        &quot;company&quot;: &quot;Acme BV&quot;,
+        &quot;emailAddress&quot;: &quot;john@example.com&quot;
+      },
+      &quot;shipping&quot;: {
+        &quot;firstname&quot;: &quot;John&quot;,
+        &quot;lastname&quot;: &quot;Doe&quot;,
+        &quot;company&quot;: &quot;Acme BV&quot;,
+        &quot;streetAddress&quot;: &quot;Keizersgracht&quot;,
+        &quot;houseNumber&quot;: &quot;100&quot;,
+        &quot;postcode&quot;: &quot;1015AA&quot;,
+        &quot;city&quot;: &quot;Amsterdam&quot;,
+        &quot;country&quot;: {
+          &quot;id&quot;: 150,
+          &quot;name&quot;: &quot;Netherlands&quot;,
+          &quot;isoCode2&quot;: &quot;NL&quot;
+        }
+      },
+      &quot;products&quot;: [
+        {
+          &quot;id&quot;: 5001,
+          &quot;ordersId&quot;: 336,
+          &quot;status&quot;: {
+            &quot;id&quot;: 1,
+            &quot;isOpen&quot;: 1,
+            &quot;isPaid&quot;: 0,
+            &quot;isShipped&quot;: 0
+          },
+          &quot;sku&quot;: &quot;LENOVO_0A36262&quot;,
+          &quot;name&quot;: &quot;Lenovo ThinkPad Dock&quot;,
+          &quot;quantity&quot;: 2,
+          &quot;price&quot;: 31.20,
+          &quot;subtotalExclTax&quot;: 62.40,
+          &quot;subtotalInclTax&quot;: 75.50,
+          &quot;productVatPercentage&quot;: 21
+        },
+        {
+          &quot;id&quot;: 5002,
+          &quot;ordersId&quot;: 336,
+          &quot;status&quot;: {
+            &quot;id&quot;: 1,
+            &quot;isOpen&quot;: 1,
+            &quot;isPaid&quot;: 0,
+            &quot;isShipped&quot;: 0
+          },
+          &quot;sku&quot;: &quot;HP_1X644AA&quot;,
+          &quot;name&quot;: &quot;HP Prelude Pro Backpack&quot;,
+          &quot;quantity&quot;: 1,
+          &quot;price&quot;: 31.00,
+          &quot;subtotalExclTax&quot;: 31.00,
+          &quot;subtotalInclTax&quot;: 37.51,
+          &quot;productVatPercentage&quot;: 21
+        }
+      ]
+    }
+  ]
+}</code></pre><h2 id="response-field-reference">Response Field Reference</h2><h3 id="order-fields">Order Fields</h3><div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>id</code></td><td>integer</td><td>Order ID.</td></tr><tr><td><code>status</code></td><td>object</td><td>Order status object.</td></tr><tr><td><code>currency</code></td><td>object</td><td>Currency details, including <code>code</code>, <code>title</code>, and <code>value</code>.</td></tr><tr><td><code>referenceCode</code></td><td>string</td><td>External reference code.</td></tr><tr><td><code>subtotalExc</code></td><td>number</td><td>Subtotal excluding VAT.</td></tr><tr><td><code>subtotalInc</code></td><td>number</td><td>Subtotal including VAT.</td></tr><tr><td><code>shippingExc</code></td><td>number</td><td>Shipping amount excluding VAT.</td></tr><tr><td><code>shippingInc</code></td><td>number</td><td>Shipping amount including VAT.</td></tr><tr><td><code>totalExc</code></td><td>number</td><td>Total excluding VAT.</td></tr><tr><td><code>totalInc</code></td><td>number</td><td>Total including VAT.</td></tr><tr><td><code>datePurchased</code></td><td>string</td><td>Order creation date.</td></tr><tr><td><code>lastModified</code></td><td>string</td><td>Last update date.</td></tr><tr><td><code>customer</code></td><td>object</td><td>Customer details.</td></tr><tr><td><code>shipping</code></td><td>object</td><td>Shipping address.</td></tr><tr><td><code>invoice</code></td><td>object</td><td>Invoice address.</td></tr><tr><td><code>products</code></td><td>array</td><td>Product lines.</td></tr></tbody></table></div><h3 id="product-line-fields">Product Line Fields</h3><div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>id</code></td><td>integer</td><td>Order line ID.</td></tr><tr><td><code>ordersId</code></td><td>integer</td><td>Parent order ID.</td></tr><tr><td><code>status</code></td><td>object</td><td>Product-line status object.</td></tr><tr><td><code>sku</code></td><td>string</td><td>Product SKU.</td></tr><tr><td><code>name</code></td><td>string</td><td>Product name.</td></tr><tr><td><code>quantity</code></td><td>integer</td><td>Ordered quantity.</td></tr><tr><td><code>price</code></td><td>number</td><td>Unit price.</td></tr><tr><td><code>subtotalExclTax</code></td><td>number</td><td>Line total excluding VAT.</td></tr><tr><td><code>subtotalInclTax</code></td><td>number</td><td>Line total including VAT.</td></tr><tr><td><code>productVatPercentage</code></td><td>integer</td><td>VAT percentage.</td></tr><tr><td><code>brand</code></td><td>object</td><td>Brand details, including <code>id</code> and <code>name</code>.</td></tr><tr><td><code>stockLocation</code></td><td>object</td><td>Warehouse details, including <code>id</code>, <code>code</code>, and <code>name</code>.</td></tr><tr><td><code>model</code></td><td>string</td><td>Product model.</td></tr><tr><td><code>mpn</code></td><td>string</td><td>Manufacturer part number.</td></tr><tr><td><code>gtin</code></td><td>string</td><td>Global Trade Item Number.</td></tr></tbody></table></div><h3 id="status-object">Status Object</h3><p>The status object is used at both order level and product-line level.</p><div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>id</code></td><td>integer</td><td>Status ID.</td></tr><tr><td><code>name</code></td><td>string</td><td>Public status name, such as <code>New Order</code>, <code>Processing</code>, <code>Shipped</code>, or <code>Delivered</code>.</td></tr><tr><td><code>isOpen</code></td><td>integer</td><td><code>1</code> means the order or line is still open.</td></tr><tr><td><code>isPaid</code></td><td>integer</td><td><code>1</code> means the order or line is marked as paid.</td></tr><tr><td><code>isShipped</code></td><td>integer</td><td><code>1</code> means the order or line is marked as shipped.</td></tr><tr><td><code>isBlocking</code></td><td>integer</td><td><code>1</code> means the status blocks further processing.</td></tr><tr><td><code>isQuote</code></td><td>integer</td><td><code>1</code> means the record is a quote, not a confirmed order.</td></tr></tbody></table></div><h2 id="response-codes">Response Codes</h2><h3 id="success-codes">Success Codes</h3><div class="table-wrap"><table><thead><tr><th>Code</th><th>HTTP Status</th><th>Description</th></tr></thead><tbody><tr><td><code>ORDER_CREATED</code></td><td><code>200</code></td><td>Order created successfully without warnings.</td></tr><tr><td><code>ORDER_CREATED_WITH_WARNINGS</code></td><td><code>200</code></td><td>Order created with warnings and may be placed on hold.</td></tr><tr><td><code>ORDER_CREATED_SPLIT</code></td><td><code>200</code></td><td>Order split into multiple orders by distributor region.</td></tr></tbody></table></div><h3 id="error-codes">Error Codes</h3><div class="table-wrap"><table><thead><tr><th>Code</th><th>HTTP Status</th><th>Description</th></tr></thead><tbody><tr><td><code>UNAUTHORIZED</code></td><td><code>401</code></td><td>Invalid or missing authentication credentials.</td></tr><tr><td><code>METHOD_NOT_ALLOWED</code></td><td><code>405</code></td><td>Incorrect HTTP method. For example, <code>GET</code> was used for order creation.</td></tr><tr><td><code>INCORRECT_PARAMS</code></td><td><code>400</code></td><td>Missing or invalid required parameters.</td></tr><tr><td><code>CUSTOMER_NOT_FOUND</code></td><td><code>400</code></td><td>The supplied <code>customer_id</code> does not match a known login.</td></tr><tr><td><code>ORDER_REJECTED_UNKNOWN_PRODUCTS</code></td><td><code>400</code></td><td>One or more SKUs or product IDs were not found.</td></tr><tr><td><code>ERROR_WHILE_TRYING_TO_EXECUTE_OPERATION</code></td><td><code>500</code></td><td>Server error while saving the order.</td></tr></tbody></table></div><h3 id="warning-types">Warning Types</h3><p>Warnings are returned in the <code>warnings</code> array.</p><div class="table-wrap"><table><thead><tr><th>Type</th><th>Fields</th><th>Description</th></tr></thead><tbody><tr><td><code>price_mismatch</code></td><td><code>sku</code>, <code>submitted_price</code>, <code>batavi_price</code></td><td>Submitted unit price differs from the system price for the customer.</td></tr><tr><td><code>out_of_stock</code></td><td><code>sku</code>, <code>available_stock</code>, <code>requested_quantity</code></td><td>Requested quantity exceeds available stock.</td></tr><tr><td><code>invalid_stock_location</code></td><td><code>sku</code>, <code>submitted_stock_location</code></td><td>Submitted stock location code was not found; the product&#x27;s default stock location was used.</td></tr></tbody></table></div><p>Whether warnings are generated and how they affect order status depends on shop configuration. When warning checks are enabled, orders with warnings are typically placed on hold for manual review.</p><h2 id="implementation-notes">Implementation Notes</h2><ul><li><code>customer_id</code> is the login ID supplied by the shop administrator.</li><li>Always send both <code>shipping</code> and <code>invoice</code>, even when both addresses are the same.</li><li>Duplicate addresses are detected automatically and do not create duplicate address records.</li><li>If <code>price</code> is omitted from a product line, Batavi calculates the price automatically.</li><li>If <code>price</code> is submitted and differs from the Batavi price, the API may return a <code>price_mismatch</code> warning.</li><li>Use the <code>fields</code> parameter on <code>/rest/order/list</code> when a connector only needs a small subset of order data.</li><li>Treat <code>confirmed: true</code> as a successful operation. Treat <code>error: true</code> as a failed operation.</li></ul>
+  </main>
+</body>
+</html>
